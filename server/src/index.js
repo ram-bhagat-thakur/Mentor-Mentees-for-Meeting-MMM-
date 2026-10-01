@@ -6,7 +6,8 @@ import { env } from "./config/env.js";
 import { initializeSocketServer } from "./socket/index.js";
 
 const httpServer = createServer(app);
-initializeSocketServer(httpServer, { clientUrl: env.clientUrl });
+const io = initializeSocketServer(httpServer, { clientUrl: env.clientUrl });
+app.set("io", io);
 
 httpServer.listen(env.port, () => {
   console.log(`MMM API and Socket.IO listening on port ${env.port}`);

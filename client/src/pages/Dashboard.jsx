@@ -4,6 +4,7 @@ import SkeletonCard from "../components/common/SkeletonCard.jsx";
 import LiveRoomCard from "../components/dashboard/LiveRoomCard.jsx";
 import MentorSearch from "../components/dashboard/MentorSearch.jsx";
 import WorkspaceLayout from "../components/dashboard/WorkspaceLayout.jsx";
+import useSocket from "../hooks/useSocket.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import roomService from "../services/roomService.js";
 
@@ -13,6 +14,22 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshCount, setRefreshCount] = useState(0);
+
+  function handleFeedStatusChange(payload) {
+    if (!payload?.room?._id) return;
+
+    setRooms((currentRooms) => {
+      const roomId = payload.room._id;
+      if (payload.action === "ended" || payload.room.status !== "ongoing") {
+        return currentRooms.filter((room) => room._id !== roomId);
+      }
+
+      const withoutUpdatedRoom = currentRooms.filter((room) => room._id !== roomId);
+      return [payload.room, ...withoutUpdatedRoom];
+    });
+  }
+
+  const { isConnected } = useSocket({ onFeedStatusChange: handleFeedStatusChange });
 
   useEffect(() => {
     const controller = new AbortController();
@@ -70,9 +87,15 @@ export default function Dashboard() {
               </h2>
             </div>
             {!isLoading && !error && (
-              <p className="text-sm text-slate-500">
-                {rooms.length} {rooms.length === 1 ? "room" : "rooms"} active
-              </p>
+              <div className="flex items-center gap-3">
+                <p className="text-sm text-slate-500">
+                  {rooms.length} {rooms.length === 1 ? "room" : "rooms"} active
+                </p>
+                <span className="inline-flex items-center gap-1.5 text-xs text-slate-500">
+                  <span className={`h-2 w-2 rounded-full ${isConnected ? "bg-status-live-500" : "bg-slate-300"}`} />
+                  {isConnected ? "Live updates on" : "Reconnecting"}
+                </span>
+              </div>
             )}
           </div>
 
@@ -101,7 +124,7 @@ export default function Dashboard() {
           ) : (
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {rooms.map((room) => (
-                <LiveRoomCard key={room._id} room={room} />
+                <LiveRoomCard key={room._id} onRoomUpdated={handleFeedStatusChange} room={room} />
               ))}
             </div>
           )}

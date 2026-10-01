@@ -1,4 +1,6 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import roomService from "../../services/roomService.js";
 
 function getInitials(name = "Mentor") {
   return name
@@ -9,9 +11,26 @@ function getInitials(name = "Mentor") {
     .join("");
 }
 
-export default function LiveRoomCard({ room }) {
+export default function LiveRoomCard({ room, onRoomUpdated }) {
   const host = room.hostId || {};
   const topics = room.topics || [];
+  const navigate = useNavigate();
+  const [isJoining, setIsJoining] = useState(false);
+  const [joinError, setJoinError] = useState("");
+
+  async function handleJoin() {
+    setIsJoining(true);
+    setJoinError("");
+    try {
+      const result = await roomService.joinRoom(room._id);
+      onRoomUpdated?.(result.room);
+      navigate(`/rooms/${room._id}`);
+    } catch (error) {
+      setJoinError(error.message);
+    } finally {
+      setIsJoining(false);
+    }
+  }
 
   return (
     <article className="flex min-h-60 flex-col rounded-card border border-slate-200 bg-surface p-5 shadow-sm transition-shadow hover:shadow-md">
@@ -53,13 +72,16 @@ export default function LiveRoomCard({ room }) {
             </span>
           </span>
         </div>
-        <Link
-          className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-button bg-primary-500 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-          to={`/rooms/${room._id}`}
+        <button
+          className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-button bg-primary-500 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-wait disabled:opacity-70"
+          disabled={isJoining}
+          onClick={handleJoin}
+          type="button"
         >
-          Join Room
-        </Link>
+          {isJoining ? "Joining" : "Join Room"}
+        </button>
       </div>
+      {joinError && <p className="mt-2 text-xs text-status-error-700" role="alert">{joinError}</p>}
     </article>
   );
 }
