@@ -7,6 +7,7 @@
 * Project architecture and technical specification phase completed.
 * TASK-001 repository and workspace initialization completed and verified.
 * TASK-002 Tailwind CSS and design token setup completed and verified.
+* TASK-003 Express middleware and MongoDB Atlas connection completed and verified.
 * Development phase is underway.
 
 ---
@@ -28,6 +29,9 @@
 * Tailwind CSS and Design Token Setup (TASK-002)
 
 
+* Express Backend and MongoDB Atlas Connection (TASK-003)
+
+
 * Development Rules & Cursor Rulebook (`RULES.md`, `.cursor/rules/real-time.mdc`)
 
 
@@ -42,10 +46,9 @@
 
 ## Current Task
 
-**TASK-003: Backend Express & MongoDB Atlas Connection**
+**TASK-004: Mongoose Schemas Definition**
 
-* Initialize Express middleware and connect Mongoose to MongoDB Atlas.
-* Define environment configuration for server ports and database URIs.
+* Implement User and Room schemas following the product and security requirements.
 
 ---
 
@@ -57,4 +60,4 @@
 
 ## Next Step
 
-Execute **TASK-003** and proceed sequentially through Phase 1 setup tasks in `TASKS.md`.
+Execute **TASK-004** and proceed sequentially through Phase 2 database schema tasks in `TASKS.md`.

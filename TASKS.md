@@ -43,7 +43,7 @@ Proceed to Next Sequential Task
 * Define custom typography (Inter), border-radius utilities (`12px` cards, `8px` buttons), and badge styling rules.
 
 
-* [ ] **TASK-003: Backend Express & MongoDB Atlas Connection**
+* [x] **TASK-003: Backend Express & MongoDB Atlas Connection**
 * Initialize Express server app with CORS, JSON body parser, and error handling middleware.
 
 
