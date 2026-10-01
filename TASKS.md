@@ -139,7 +139,7 @@ Proceed to Next Sequential Task
 
 ## Phase 5: WebRTC Video Streaming & Request Queue System
 
-* [ ] **TASK-011: Agora RTC Server Token Generation**
+* [x] **TASK-011: Agora RTC Server Token Generation**
 * Build secure `GET /api/rooms/:roomId/agora-token` REST endpoint using the Agora SDK on the backend.
 
 

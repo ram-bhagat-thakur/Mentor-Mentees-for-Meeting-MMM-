@@ -30,6 +30,10 @@ const roomSchema = new Schema(
       type: [{ type: Schema.Types.ObjectId, ref: "User" }],
       default: [],
     },
+    stageParticipants: {
+      type: [{ type: Schema.Types.ObjectId, ref: "User" }],
+      default: [],
+    },
     maxParticipants: { type: Number, min: 1, max: 100, default: 25 },
     joinRequests: { type: [joinRequestSchema], default: [] },
   },
@@ -43,6 +47,7 @@ roomSchema.pre("validate", function validateParticipants() {
   const requestIds = this.joinRequests
     .filter((request) => request.userId != null)
     .map((request) => request.userId.toString());
+  const stageParticipantIds = this.stageParticipants.map((participant) => participant.toString());
 
   if (participantIds.length > this.maxParticipants) {
     this.invalidate("activeParticipants", "The room exceeds maxParticipants.");
@@ -54,6 +59,10 @@ roomSchema.pre("validate", function validateParticipants() {
 
   if (new Set(requestIds).size !== requestIds.length) {
     this.invalidate("joinRequests", "A user may only have one pending join request.");
+  }
+
+  if (stageParticipantIds.some((participantId) => !participantIds.includes(participantId))) {
+    this.invalidate("stageParticipants", "Stage participants must also be active room participants.");
   }
 });
 

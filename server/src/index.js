@@ -11,5 +11,8 @@ app.set("io", io);
 
 httpServer.listen(env.port, () => {
   console.log(`MMM API and Socket.IO listening on port ${env.port}`);
+  if (!env.agoraConfigured) {
+    console.error("Agora RTC token service is not configured. Set AGORA_APP_ID and AGORA_APP_CERTIFICATE.");
+  }
   void connectDatabase();
 });

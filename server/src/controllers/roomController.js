@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
+import rateLimit from "express-rate-limit";
 import { z } from "zod";
 import Room from "../models/Room.js";
 import { broadcastFeedStatus, serializeFeedRoom } from "../socket/events/feedEvents.js";
+import { createAgoraRtcToken } from "../services/agoraService.js";
 import { listLiveRooms } from "../services/roomService.js";
 
 const createRoomSchema = z.object({
@@ -10,6 +12,15 @@ const createRoomSchema = z.object({
   topics: z.array(z.string().trim().min(1).max(80)).max(12).optional().default([]),
   maxParticipants: z.coerce.number().int().min(1).max(100).optional().default(25),
 }).strict();
+
+export const agoraTokenLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 30,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  handler: (_request, response) =>
+    response.status(429).json({ error: "Too many RTC token requests. Please try again later." }),
+});
 
 function invalidRoomId(response) {
   return response.status(404).json({ error: "Room not found." });
@@ -104,6 +115,7 @@ export async function leaveRoom(request, response, next) {
     );
     if (wasParticipant) {
       room.activeParticipants.pull(request.user._id);
+      room.stageParticipants.pull(request.user._id);
       await room.save();
       await room.populate({ path: "hostId", select: "name college mentorProfile.company" });
       emitRoomEvent(request, "updated", room);
@@ -128,6 +140,7 @@ export async function endRoom(request, response, next) {
     if (room.status !== "ended") {
       room.status = "ended";
       room.activeParticipants = [];
+      room.stageParticipants = [];
       await room.save();
       await room.populate({ path: "hostId", select: "name college mentorProfile.company" });
       emitRoomEvent(request, "ended", room);
@@ -136,6 +149,34 @@ export async function endRoom(request, response, next) {
     }
 
     return response.status(200).json({ room: serializeFeedRoom(room) });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function getAgoraToken(request, response, next) {
+  try {
+    const room = await findRoom(request.params.roomId, response);
+    if (!room) return undefined;
+
+    const isHost = room.hostId.toString() === request.user._id.toString();
+    const isActiveParticipant = room.activeParticipants.some((participantId) =>
+      participantId.equals(request.user._id),
+    );
+
+    if (!isHost && !isActiveParticipant) {
+      return response.status(403).json({
+        error: "User is not an authorized participant in this room",
+      });
+    }
+
+    if (room.status !== "ongoing") {
+      return response.status(409).json({ error: "Agora tokens are only available for live rooms." });
+    }
+
+    const token = createAgoraRtcToken({ room, user: request.user });
+    response.set("Cache-Control", "no-store");
+    return response.status(200).json(token);
   } catch (error) {
     return next(error);
   }

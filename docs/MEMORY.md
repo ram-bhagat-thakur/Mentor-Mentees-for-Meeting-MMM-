@@ -15,6 +15,7 @@
 * TASK-008 live room feed and mentor directory UI completed and verified.
 * TASK-009 Socket.IO HTTP integration and JWT handshake authentication completed and verified.
 * TASK-010 room feed create/update/end broadcasts and dashboard Socket.IO synchronization completed and verified.
+* TASK-011 Agora RTC token service and authorized room access completed and verified.
 * Development phase is underway.
 
 ---
@@ -60,6 +61,9 @@
 * Live Feed Real-Time Status Broadcasts (TASK-010)
 
 
+* Agora RTC Server Token Generation (TASK-011)
+
+
 * Development Rules & Cursor Rulebook (`RULES.md`, `.cursor/rules/real-time.mdc`)
 
 
@@ -74,9 +78,9 @@
 
 ## Current Task
 
-**TASK-011: Agora RTC Server Token Generation**
+**TASK-012: Live Room Creation & Audio/Video Canvas UI**
 
-* Generate Agora RTC tokens on the backend after verifying room access permissions.
+* Build live-room setup, Agora video canvas, and microphone/camera controls.
 
 ---
 
@@ -88,4 +92,4 @@
 
 ## Next Step
 
-Execute **TASK-011** and proceed sequentially through Phase 5 video infrastructure tasks in `TASKS.md`.
+Execute **TASK-012** and proceed sequentially through Phase 5 video infrastructure tasks in `TASKS.md`.
