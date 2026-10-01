@@ -69,7 +69,7 @@ Proceed to Next Sequential Task
 
 
 
-* [ ] **TASK-005: Authentication API Routes & JWT Middleware**
+* [x] **TASK-005: Authentication API Routes & JWT Middleware**
 * Build `POST /api/auth/register` and `POST /api/auth/login` controllers.
 
 

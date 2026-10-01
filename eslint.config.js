@@ -33,7 +33,7 @@ export default [
     },
   },
   {
-    files: ["server/src/**/*.js"],
+    files: ["server/src/**/*.js", "server/tests/**/*.js"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",

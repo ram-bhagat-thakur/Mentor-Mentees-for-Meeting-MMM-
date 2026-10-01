@@ -5,15 +5,19 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
-    "check": "node --check src/config/env.js && node --check src/config/db.js && node --check src/middleware/errorHandler.js && node --check src/app.js && node --check src/index.js && node --check src/models/User.js && node --check src/models/Room.js && node --check src/models/index.js && node --check tests/models.test.js",
+    "check": "node --check src/config/env.js && node --check src/config/db.js && node --check src/middleware/errorHandler.js && node --check src/middleware/authMiddleware.js && node --check src/app.js && node --check src/index.js && node --check src/models/User.js && node --check src/models/Room.js && node --check src/models/index.js && node --check src/controllers/authController.js && node --check src/routes/authRoutes.js && node --check src/utils/emailValidator.js && node --check src/utils/jwt.js && node --check tests/models.test.js && node --check tests/authRoutes.test.js",
     "lint": "eslint src tests",
     "test": "node --test"
   },
   "dependencies": {
-    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
+    "express-rate-limit": "^8.1.0",
     "express": "^5.1.0",
-    "mongoose": "^8.18.0"
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.18.0",
+    "zod": "^3.25.76"
   }
 }
