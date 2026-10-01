@@ -1,10 +1,14 @@
+import { createServer } from "node:http";
 import "./config/env.js";
 import app from "./app.js";
 import { connectDatabase } from "./config/db.js";
+import { env } from "./config/env.js";
+import { initializeSocketServer } from "./socket/index.js";
 
-const port = Number(process.env.PORT) || 5000;
+const httpServer = createServer(app);
+initializeSocketServer(httpServer, { clientUrl: env.clientUrl });
 
-app.listen(port, () => {
-  console.log(`MMM API listening on port ${port}`);
+httpServer.listen(env.port, () => {
+  console.log(`MMM API and Socket.IO listening on port ${env.port}`);
   void connectDatabase();
 });

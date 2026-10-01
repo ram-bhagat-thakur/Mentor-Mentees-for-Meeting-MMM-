@@ -13,6 +13,7 @@
 * TASK-006 frontend authentication context, forms, and route protection completed and verified.
 * TASK-007 mentor search API, text indexes, filters, and pagination completed and verified.
 * TASK-008 live room feed and mentor directory UI completed and verified.
+* TASK-009 Socket.IO HTTP integration and JWT handshake authentication completed and verified.
 * Development phase is underway.
 
 ---
@@ -52,6 +53,9 @@
 * Live Feed and Mentor Directory UI (TASK-008)
 
 
+* Socket.IO Server Setup and Connection Authentication (TASK-009)
+
+
 * Development Rules & Cursor Rulebook (`RULES.md`, `.cursor/rules/real-time.mdc`)
 
 
@@ -66,9 +70,9 @@
 
 ## Current Task
 
-**TASK-009: Socket.io Server Setup & Connection Authentication**
+**TASK-010: Live Feed Real-Time Status Broadcasts**
 
-* Add authenticated Socket.io connection setup and signaling middleware.
+* Broadcast live room status changes and synchronize the dashboard feed over Socket.IO.
 
 ---
 
@@ -80,4 +84,4 @@
 
 ## Next Step
 
-Execute **TASK-009** and proceed sequentially through Phase 4 real-time signaling tasks in `TASKS.md`.
+Execute **TASK-010** and proceed sequentially through Phase 4 real-time signaling tasks in `TASKS.md`.

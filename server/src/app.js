@@ -7,11 +7,12 @@ import authMiddleware from "./middleware/authMiddleware.js";
 import mentorRoutes from "./routes/mentorRoutes.js";
 import roomRoutes from "./routes/roomRoutes.js";
 import errorHandler from "./middleware/errorHandler.js";
+import { env } from "./config/env.js";
 
 const app = express();
 
 app.use(helmet());
-app.use(cors({ origin: process.env.CLIENT_URL || "http://127.0.0.1:5173" }));
+app.use(cors({ origin: env.clientUrl }));
 app.use(express.json({ limit: "1mb" }));
 
 app.get("/api/health", (_request, response) => {
