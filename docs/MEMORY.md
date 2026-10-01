@@ -10,6 +10,7 @@
 * TASK-003 Express middleware and MongoDB Atlas connection completed and verified.
 * TASK-004 User and Room Mongoose schemas completed and verified.
 * TASK-005 registration/login routes, JWT middleware, and institutional email validation completed and verified.
+* TASK-006 frontend authentication context, forms, and route protection completed and verified.
 * Development phase is underway.
 
 ---
@@ -40,6 +41,9 @@
 * Authentication API and JWT Middleware (TASK-005)
 
 
+* Frontend Authentication and Route Protection (TASK-006)
+
+
 * Development Rules & Cursor Rulebook (`RULES.md`, `.cursor/rules/real-time.mdc`)
 
 
@@ -54,9 +58,9 @@
 
 ## Current Task
 
-**TASK-006: Frontend Authentication & Route Protection**
+**TASK-007: Mentor Search & Discovery API**
 
-* Build AuthContext, signup/login forms, and protected client routes using the authentication API.
+* Add mentor search filters for skills, companies, roles, and alma mater.
 
 ---
 
@@ -68,4 +72,4 @@
 
 ## Next Step
 
-Execute **TASK-006** and proceed sequentially through Phase 2 authentication tasks in `TASKS.md`.
+Execute **TASK-007** and proceed sequentially through Phase 3 discovery tasks in `TASKS.md`.

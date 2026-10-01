@@ -1,64 +1,137 @@
-export default function App() {
+import { Link, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import LoginForm from "./components/auth/LoginForm.jsx";
+import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
+import SignupForm from "./components/auth/SignupForm.jsx";
+import { useAuth } from "./context/AuthContext.jsx";
+
+function WorkspacePage({ mode = "dashboard" }) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isRoomsPage = mode === "rooms";
+
+  function handleLogout() {
+    logout();
+    navigate("/login", { replace: true });
+  }
+
   return (
-    <main className="container py-10 sm:py-14">
-      <header className="max-w-3xl">
-        <p className="text-sm font-semibold uppercase tracking-widest text-primary-700">
-          Mentors Meet Mentees
-        </p>
-        <h1 className="mt-3 text-4xl text-slate-900">A clearer path, together.</h1>
-        <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
-          A shared design foundation for students finding direction and mentors
-          opening doors.
-        </p>
-      </header>
-
-      <section className="mt-10 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]" aria-label="Design token showcase">
-        <article className="rounded-card border border-slate-200 bg-surface p-6 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-medium text-slate-500">Live micro-webinar</p>
-              <h2 className="mt-1 text-xl text-slate-900">Building your first portfolio</h2>
-            </div>
-            <span className="inline-flex min-h-8 items-center gap-2 rounded-full bg-status-live-100 px-3 py-1 text-sm font-medium text-status-live-700">
-              <span className="h-2 w-2 rounded-full bg-status-live-500" aria-hidden="true" />
-              Live now
+    <div className="min-h-screen bg-background">
+      <header className="border-b border-slate-200 bg-surface">
+        <div className="container flex min-h-16 items-center justify-between gap-4">
+          <Link className="flex min-h-11 items-center gap-3" to="/dashboard">
+            <span className="grid h-9 w-9 place-items-center rounded-button bg-primary-600 text-xs font-bold text-white">
+              MMM
             </span>
-          </div>
+            <span className="hidden text-sm font-semibold text-slate-900 sm:inline">
+              Mentors Meet Mentees
+            </span>
+          </Link>
 
-          <p className="mt-4 text-sm leading-6 text-slate-600">
-            A practical session with alumni on turning project work into a
-            portfolio that hiring teams can scan.
-          </p>
+          <nav aria-label="Main navigation" className="flex items-center gap-1">
+            <Link
+              aria-current={!isRoomsPage ? "page" : undefined}
+              className={`flex min-h-11 items-center rounded-button px-3 text-sm font-medium ${
+                !isRoomsPage ? "bg-primary-50 text-primary-700" : "text-slate-600 hover:bg-slate-100"
+              }`}
+              to="/dashboard"
+            >
+              Overview
+            </Link>
+            <Link
+              aria-current={isRoomsPage ? "page" : undefined}
+              className={`flex min-h-11 items-center rounded-button px-3 text-sm font-medium ${
+                isRoomsPage ? "bg-primary-50 text-primary-700" : "text-slate-600 hover:bg-slate-100"
+              }`}
+              to="/rooms"
+            >
+              Rooms
+            </Link>
+          </nav>
 
-          <div className="mt-6 flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-3">
+            <span className="hidden max-w-40 truncate text-sm text-slate-600 md:inline">
+              {user?.email}
+            </span>
             <button
-              className="min-h-11 rounded-button bg-primary-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+              className="min-h-11 rounded-button border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+              onClick={handleLogout}
               type="button"
             >
-              Request to join
+              Log out
             </button>
-            <span className="rounded-full bg-status-queue-50 px-3 py-1.5 text-sm font-medium text-status-queue-700">
-              2 waiting
-            </span>
           </div>
-        </article>
+        </div>
+      </header>
 
-        <aside className="rounded-card border border-slate-200 bg-surface p-6 shadow-sm">
-          <p className="text-sm font-semibold text-slate-500">Type & palette</p>
-          <p className="mt-3 text-2xl font-semibold text-slate-900">Inter, sans-serif</p>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            Clear hierarchy, measured contrast, and familiar neutral surfaces.
-          </p>
-          <div className="mt-6 flex gap-2" aria-label="Brand color palette">
-            <span className="h-8 flex-1 rounded-md bg-primary-50" title="Primary 50" />
-            <span className="h-8 flex-1 rounded-md bg-primary-100" title="Primary 100" />
-            <span className="h-8 flex-1 rounded-md bg-primary-500" title="Primary 500" />
-            <span className="h-8 flex-1 rounded-md bg-primary-600" title="Primary 600" />
-            <span className="h-8 flex-1 rounded-md bg-primary-700" title="Primary 700" />
+      <main className="container py-10 sm:py-14">
+        <p className="text-sm font-semibold uppercase tracking-widest text-primary-700">
+          {isRoomsPage ? "Live sessions" : "Your workspace"}
+        </p>
+        <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl text-slate-900">
+              {isRoomsPage ? "Rooms" : `Welcome, ${user?.name}`}
+            </h1>
+            <p className="mt-2 text-sm text-slate-600">
+              {isRoomsPage
+                ? "Your live and upcoming sessions will appear here."
+                : `${user?.college} · ${user?.role === "mentor" ? "Mentor" : "Mentee"}`}
+            </p>
           </div>
-          <p className="mt-2 font-mono text-xs text-slate-500">primary-50 to primary-700</p>
-        </aside>
-      </section>
-    </main>
+          {!isRoomsPage && (
+            <Link
+              className="inline-flex min-h-11 items-center rounded-button bg-primary-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+              to="/rooms"
+            >
+              Browse rooms
+            </Link>
+          )}
+        </div>
+
+        <section
+          aria-label={isRoomsPage ? "Room list" : "Profile summary"}
+          className="mt-8 rounded-card border border-slate-200 bg-surface p-6 shadow-sm sm:p-8"
+        >
+          {isRoomsPage ? (
+            <div className="py-8 text-center">
+              <h2 className="text-lg text-slate-900">No sessions yet</h2>
+              <p className="mt-2 text-sm text-slate-600">
+                New sessions will be listed here when they are available.
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div>
+                <p className="text-sm font-medium text-slate-500">Account email</p>
+                <p className="mt-1 break-all text-base font-medium text-slate-900">{user?.email}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-500">Account type</p>
+                <p className="mt-1 text-base font-medium capitalize text-slate-900">{user?.role}</p>
+              </div>
+            </div>
+          )}
+        </section>
+        <span className="sr-only" aria-live="polite">
+          Current route: {location.pathname}
+        </span>
+      </main>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate replace to="/dashboard" />} />
+      <Route path="/login" element={<LoginForm />} />
+      <Route path="/signup" element={<SignupForm />} />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/dashboard" element={<WorkspacePage />} />
+        <Route path="/rooms/*" element={<WorkspacePage mode="rooms" />} />
+      </Route>
+      <Route path="*" element={<Navigate replace to="/dashboard" />} />
+    </Routes>
   );
 }

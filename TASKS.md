@@ -81,7 +81,7 @@ Proceed to Next Sequential Task
 
 
 
-* [ ] **TASK-006: Frontend Authentication & Route Protection**
+* [x] **TASK-006: Frontend Authentication & Route Protection**
 * Implement `AuthContext` to manage global user session state and JWT token persistence.
 * Create Sign-Up and Login form components adhering to form error handling standards.
 * Set up protected routing components to restrict unauthenticated access to the live feed and room views.
