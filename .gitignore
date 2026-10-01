@@ -1,0 +1,72 @@
+# Git Ignore Configuration
+
+# Dependencies
+
+node_modules/
+.pnpm-store/
+
+# Environment & Local Configuration Files
+
+client/.env
+server/.env
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# GitHub Copilot & IDE Extensions
+
+.copilot/
+.github/copilot-instructions.md.override
+
+# Editor Directories & Files
+
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.idea/
+*.suo
+*.ntvsopt
+*.njsproj
+*.sln
+*.swp
+*.swo
+
+# Build & Production Distributions
+
+build/
+dist/
+out/
+.next/
+.serverless/
+.vuepress/dist
+
+# Real-Time & Media Service Logs / Temp Outputs
+
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Testing & Coverage
+
+coverage/
+.nyc_output/
+.jest/
+
+# OS Generated Files
+
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
