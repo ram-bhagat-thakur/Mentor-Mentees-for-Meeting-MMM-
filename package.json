@@ -11,7 +11,7 @@
     "dev:client": "npm run dev --workspace=client",
     "dev:server": "npm run dev --workspace=server",
     "build": "npm run build --workspace=client",
-    "lint": "eslint eslint.config.js client/vite.config.js && npm run lint --workspaces --if-present",
+    "lint": "eslint eslint.config.js client/vite.config.js client/tailwind.config.js client/postcss.config.js && npm run lint --workspaces --if-present",
     "check": "npm run check --workspace=server && npm run build --workspace=client"
   },
   "devDependencies": {

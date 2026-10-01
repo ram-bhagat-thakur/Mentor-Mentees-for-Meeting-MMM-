@@ -36,7 +36,7 @@ Proceed to Next Sequential Task
 * Set up Git repository with a standard `.gitignore` file.
 
 
-* [ ] **TASK-002: Tailwind CSS & Design Token Setup**
+* [x] **TASK-002: Tailwind CSS & Design Token Setup**
 * Configure `tailwind.config.js` with color palette (`#6366F1` Primary, `#0F172A` Text, `#F8FAFC` Background).
 
 
