@@ -12,6 +12,7 @@
 * TASK-005 registration/login routes, JWT middleware, and institutional email validation completed and verified.
 * TASK-006 frontend authentication context, forms, and route protection completed and verified.
 * TASK-007 mentor search API, text indexes, filters, and pagination completed and verified.
+* TASK-008 live room feed and mentor directory UI completed and verified.
 * Development phase is underway.
 
 ---
@@ -48,6 +49,9 @@
 * Mentor Search and Discovery API (TASK-007)
 
 
+* Live Feed and Mentor Directory UI (TASK-008)
+
+
 * Development Rules & Cursor Rulebook (`RULES.md`, `.cursor/rules/real-time.mdc`)
 
 
@@ -62,9 +66,9 @@
 
 ## Current Task
 
-**TASK-008: Live Feed & Mentor Directory UI**
+**TASK-009: Socket.io Server Setup & Connection Authentication**
 
-* Build the dashboard, live room cards, and searchable mentor directory.
+* Add authenticated Socket.io connection setup and signaling middleware.
 
 ---
 
@@ -76,4 +80,4 @@
 
 ## Next Step
 
-Execute **TASK-008** and proceed sequentially through Phase 3 discovery tasks in `TASKS.md`.
+Execute **TASK-009** and proceed sequentially through Phase 4 real-time signaling tasks in `TASKS.md`.

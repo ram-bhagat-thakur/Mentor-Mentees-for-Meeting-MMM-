@@ -101,7 +101,7 @@ Proceed to Next Sequential Task
 
 
 
-* [ ] **TASK-008: Live Feed & Mentor Directory UI**
+* [x] **TASK-008: Live Feed & Mentor Directory UI**
 * Build `Dashboard` component featuring ongoing live room cards with category tags.
 
 

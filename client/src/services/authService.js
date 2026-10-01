@@ -1,60 +1,14 @@
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:5000/api").replace(
-  /\/+$/,
-  "",
-);
-const TOKEN_KEY = "mmm.auth.token";
-
-function getToken() {
-  try {
-    return window.localStorage.getItem(TOKEN_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function storeToken(token) {
-  window.localStorage.setItem(TOKEN_KEY, token);
-}
-
-function clearToken() {
-  try {
-    window.localStorage.removeItem(TOKEN_KEY);
-  } catch {
-    // Storage may be unavailable in restrictive browser contexts.
-  }
-}
-
-async function request(path, options = {}) {
-  const headers = new Headers(options.headers);
-  const token = getToken();
-
-  headers.set("Accept", "application/json");
-  if (options.body) {
-    headers.set("Content-Type", "application/json");
-  }
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
-
-  const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
-  const result = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    throw new Error(result?.error || "The request could not be completed.");
-  }
-
-  return result;
-}
+import { apiRequest, tokenStorage } from "./apiClient.js";
 
 const authService = {
-  getToken,
-  storeToken,
-  clearToken,
+  getToken: tokenStorage.get,
+  storeToken: tokenStorage.set,
+  clearToken: tokenStorage.clear,
   register: (details) =>
-    request("/auth/register", { method: "POST", body: JSON.stringify(details) }),
+    apiRequest("/auth/register", { method: "POST", body: JSON.stringify(details) }),
   login: (credentials) =>
-    request("/auth/login", { method: "POST", body: JSON.stringify(credentials) }),
-  getCurrentUser: () => request("/auth/me"),
+    apiRequest("/auth/login", { method: "POST", body: JSON.stringify(credentials) }),
+  getCurrentUser: () => apiRequest("/auth/me"),
 };
 
 export default authService;
