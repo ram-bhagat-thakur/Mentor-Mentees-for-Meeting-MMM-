@@ -92,7 +92,7 @@ Proceed to Next Sequential Task
 
 ## Phase 3: Core Dashboard & Search Infrastructure
 
-* [ ] **TASK-007: Mentor Search & Discovery API**
+* [x] **TASK-007: Mentor Search & Discovery API**
 * Build `GET /api/mentors` REST endpoint with filtering support for skills, companies, roles, and shared alma mater.
 
 

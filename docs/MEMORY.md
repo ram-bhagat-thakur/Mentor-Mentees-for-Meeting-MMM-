@@ -11,6 +11,7 @@
 * TASK-004 User and Room Mongoose schemas completed and verified.
 * TASK-005 registration/login routes, JWT middleware, and institutional email validation completed and verified.
 * TASK-006 frontend authentication context, forms, and route protection completed and verified.
+* TASK-007 mentor search API, text indexes, filters, and pagination completed and verified.
 * Development phase is underway.
 
 ---
@@ -44,6 +45,9 @@
 * Frontend Authentication and Route Protection (TASK-006)
 
 
+* Mentor Search and Discovery API (TASK-007)
+
+
 * Development Rules & Cursor Rulebook (`RULES.md`, `.cursor/rules/real-time.mdc`)
 
 
@@ -58,9 +62,9 @@
 
 ## Current Task
 
-**TASK-007: Mentor Search & Discovery API**
+**TASK-008: Live Feed & Mentor Directory UI**
 
-* Add mentor search filters for skills, companies, roles, and alma mater.
+* Build the dashboard, live room cards, and searchable mentor directory.
 
 ---
 
@@ -72,4 +76,4 @@
 
 ## Next Step
 
-Execute **TASK-007** and proceed sequentially through Phase 3 discovery tasks in `TASKS.md`.
+Execute **TASK-008** and proceed sequentially through Phase 3 discovery tasks in `TASKS.md`.

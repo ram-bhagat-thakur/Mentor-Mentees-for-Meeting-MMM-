@@ -3,6 +3,8 @@ import express from "express";
 import helmet from "helmet";
 import { getDatabaseStatus } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
+import authMiddleware from "./middleware/authMiddleware.js";
+import mentorRoutes from "./routes/mentorRoutes.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 const app = express();
@@ -16,6 +18,7 @@ app.get("/api/health", (_request, response) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/mentors", authMiddleware, mentorRoutes);
 
 app.use((_request, _response, next) => {
   const error = new Error("Route not found");

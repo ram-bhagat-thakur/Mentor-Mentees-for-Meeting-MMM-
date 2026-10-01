@@ -50,9 +50,10 @@ const mentorProfileSchema = new Schema(
     jobTitle: { type: String, trim: true, maxlength: 120 },
     pricing: { type: pricingSchema, default: () => ({}) },
     availability: { type: [availabilitySchema], default: [] },
-    domainExpertise: {
+    domain: {
       type: [{ type: String, trim: true, maxlength: 80 }],
       default: [],
+      alias: "domainExpertise",
     },
     rating: { type: ratingSchema, default: () => ({}) },
   },
@@ -73,6 +74,7 @@ const userSchema = new Schema(
     password: { type: String, required: true, select: false },
     role: { type: String, required: true, enum: ["mentee", "mentor"] },
     college: { type: String, required: true, trim: true, maxlength: 160 },
+    isActive: { type: Boolean, default: true, index: true },
     skills: {
       type: [{ type: String, trim: true, maxlength: 80 }],
       default: [],
@@ -101,6 +103,28 @@ const userSchema = new Schema(
 );
 
 userSchema.index({ email: 1 }, { unique: true });
+userSchema.index(
+  {
+    skills: "text",
+    college: "text",
+    "mentorProfile.domain": "text",
+    name: "text",
+    "mentorProfile.company": "text",
+  },
+  {
+    name: "mentor_search_text",
+    weights: {
+      skills: 10,
+      name: 8,
+      "mentorProfile.domain": 6,
+      "mentorProfile.company": 4,
+      college: 2,
+    },
+  },
+);
+userSchema.index({ role: 1, isActive: 1, college: 1 });
+userSchema.index({ role: 1, isActive: 1, "mentorProfile.company": 1 });
+userSchema.index({ role: 1, isActive: 1, skills: 1 });
 
 userSchema.pre("save", async function hashPassword() {
   if (this.isModified("password")) {
