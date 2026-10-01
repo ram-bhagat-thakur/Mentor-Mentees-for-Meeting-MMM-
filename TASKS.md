@@ -60,7 +60,7 @@ Proceed to Next Sequential Task
 
 ## Phase 2: Database Schemas & Authentication Engine
 
-* [ ] **TASK-004: Mongoose Schemas Definition**
+* [x] **TASK-004: Mongoose Schemas Definition**
 * Implement `User` schema supporting dual roles (`mentee`/`mentor`), skills, college tags, and mentor profile objects.
 
 

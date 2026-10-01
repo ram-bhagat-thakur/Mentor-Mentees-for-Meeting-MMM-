@@ -8,6 +8,7 @@
 * TASK-001 repository and workspace initialization completed and verified.
 * TASK-002 Tailwind CSS and design token setup completed and verified.
 * TASK-003 Express middleware and MongoDB Atlas connection completed and verified.
+* TASK-004 User and Room Mongoose schemas completed and verified.
 * Development phase is underway.
 
 ---
@@ -32,6 +33,9 @@
 * Express Backend and MongoDB Atlas Connection (TASK-003)
 
 
+* User and Room Mongoose Schemas (TASK-004)
+
+
 * Development Rules & Cursor Rulebook (`RULES.md`, `.cursor/rules/real-time.mdc`)
 
 
@@ -46,9 +50,9 @@
 
 ## Current Task
 
-**TASK-004: Mongoose Schemas Definition**
+**TASK-005: Authentication API Routes & JWT Middleware**
 
-* Implement User and Room schemas following the product and security requirements.
+* Build registration and login routes, password verification, JWT middleware, and institutional email verification.
 
 ---
 
@@ -60,4 +64,4 @@
 
 ## Next Step
 
-Execute **TASK-004** and proceed sequentially through Phase 2 database schema tasks in `TASKS.md`.
+Execute **TASK-005** and proceed sequentially through Phase 2 authentication tasks in `TASKS.md`.

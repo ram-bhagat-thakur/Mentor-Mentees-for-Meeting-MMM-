@@ -5,10 +5,12 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
-    "check": "node --check src/config/env.js && node --check src/config/db.js && node --check src/middleware/errorHandler.js && node --check src/app.js && node --check src/index.js",
-    "lint": "eslint src"
+    "check": "node --check src/config/env.js && node --check src/config/db.js && node --check src/middleware/errorHandler.js && node --check src/app.js && node --check src/index.js && node --check src/models/User.js && node --check src/models/Room.js && node --check src/models/index.js && node --check tests/models.test.js",
+    "lint": "eslint src tests",
+    "test": "node --test"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
