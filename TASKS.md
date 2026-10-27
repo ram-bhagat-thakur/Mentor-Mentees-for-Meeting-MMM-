@@ -148,7 +148,7 @@ Proceed to Next Sequential Task
 
 
 
-* [ ] **TASK-012: Live Room Creation & Audio/Video Canvas UI**
+* [x] **TASK-012: Live Room Creation & Audio/Video Canvas UI**
 * Implement `CreateRoomModal` for mentors to set session titles and topic tags.
 
 

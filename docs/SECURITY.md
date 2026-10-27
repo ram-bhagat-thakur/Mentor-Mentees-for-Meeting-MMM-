@@ -33,7 +33,7 @@
 * **Zero Client-Side Exposure:** Never expose sensitive secrets—such as `AGORA_APP_CERTIFICATE`, `MONGODB_URI`, or `JWT_SECRET`—to client-side bundles or public GitHub repositories.
 
 
-* **Strict Key Separation:** Only public-facing keys (e.g., `REACT_APP_AGORA_APP_ID`) are permitted in client environment variables.
+* **Strict Key Separation:** Only public-facing keys (e.g., `VITE_AGORA_APP_ID`) are permitted in client environment variables, and the Agora App ID must match the server's `AGORA_APP_ID`.
 
 
 * **Agora Token Generation:** Agora WebRTC RTC tokens must be generated on the backend server on-demand after validating client permissions.
