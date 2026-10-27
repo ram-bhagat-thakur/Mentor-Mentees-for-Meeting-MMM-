@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
 import { createServer } from "node:http";
 import { once } from "node:events";
-import test from "node:test";
+import test, { after, beforeEach } from "node:test";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import { io as createSocketClient } from "socket.io-client";
@@ -11,7 +11,15 @@ import { initializeSocketServer } from "../src/socket/index.js";
 
 const previousSecret = process.env.JWT_SECRET;
 const testSecret = randomBytes(32).toString("hex");
-process.env.JWT_SECRET = testSecret;
+
+beforeEach(() => {
+  process.env.JWT_SECRET = testSecret;
+});
+
+after(() => {
+  if (previousSecret === undefined) delete process.env.JWT_SECRET;
+  else process.env.JWT_SECRET = previousSecret;
+});
 
 function id() {
   return new mongoose.Types.ObjectId().toString();
@@ -108,9 +116,11 @@ test("two authenticated clients exchange stage request and approval over Socket.
     await Promise.all([hostConnected, menteeConnected]);
 
     const hostRoom = await emitWithAck(hostClient, "room:join", { roomId: room._id });
+    const participantJoined = waitFor(hostClient, "room:participant_joined");
     const menteeRoom = await emitWithAck(menteeClient, "room:join", { roomId: room._id });
     assert.deepEqual(hostRoom.requests, []);
     assert.equal(menteeRoom.stageStatus, "idle");
+    assert.deepEqual(await participantJoined, { roomId: room._id, userId: menteeId });
 
     const queueUpdate = waitFor(hostClient, "room:queue_updated");
     const requestResult = await emitWithAck(menteeClient, "room:request_stage", { roomId: room._id });
@@ -126,12 +136,25 @@ test("two authenticated clients exchange stage request and approval over Socket.
     assert.equal(approvalResult.status, "approved");
     assert.deepEqual(await approvedNotification, { roomId: room._id });
     assert.ok(room.stageParticipants.includes(menteeId));
+
+    const participantLeft = waitFor(hostClient, "room:participant_left");
+    assert.deepEqual(
+      await emitWithAck(menteeClient, "room:leave", { roomId: room._id }),
+      { roomId: room._id },
+    );
+    assert.deepEqual(await participantLeft, { roomId: room._id, userId: menteeId });
+
+    const participantRejoined = waitFor(hostClient, "room:participant_joined");
+    await emitWithAck(menteeClient, "room:join", { roomId: room._id });
+    assert.deepEqual(await participantRejoined, { roomId: room._id, userId: menteeId });
+
+    const participantDisconnected = waitFor(hostClient, "room:participant_left");
+    menteeClient.disconnect();
+    assert.deepEqual(await participantDisconnected, { roomId: room._id, userId: menteeId });
   } finally {
     hostClient?.disconnect();
     menteeClient?.disconnect();
     await new Promise((resolve) => socketServer.close(resolve));
     if (httpServer.listening) await new Promise((resolve) => httpServer.close(resolve));
-    if (previousSecret === undefined) delete process.env.JWT_SECRET;
-    else process.env.JWT_SECRET = previousSecret;
   }
 });

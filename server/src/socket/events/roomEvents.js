@@ -16,6 +16,9 @@ const stageActionSchema = z.object({
 
 const userRoom = (userId) => `user:${userId}`;
 const roomSocketRoom = (roomId) => `room:${roomId}`;
+const presenceEvent = (socket, roomId, event, userId) => {
+  socket.to(roomSocketRoom(roomId)).emit(event, { roomId, userId });
+};
 
 function acknowledge(callback, result) {
   if (typeof callback === "function") callback(result);
@@ -47,6 +50,14 @@ export function registerRoomEvents(io, socket, { RoomModel = Room, UserModel = U
   const userId = socket.user.sub;
   socket.join(userRoom(userId));
 
+  socket.on("disconnecting", () => {
+    for (const roomName of socket.rooms || []) {
+      if (roomName.startsWith("room:")) {
+        presenceEvent(socket, roomName.slice("room:".length), "room:participant_left", userId);
+      }
+    }
+  });
+
   socket.on("room:join", async (payload, callback) => {
     const parsed = joinRoomSchema.safeParse(payload);
     if (!parsed.success) return acknowledge(callback, { error: "Invalid room request." });
@@ -63,7 +74,8 @@ export function registerRoomEvents(io, socket, { RoomModel = Room, UserModel = U
         return acknowledge(callback, { error: "You are not a participant in this room." });
       }
 
-      socket.join(roomSocketRoom(roomId));
+      const socketRoom = roomSocketRoom(roomId);
+      const alreadyJoined = socket.rooms?.has(socketRoom) || false;
       const response = { roomId };
       if (isHost) response.requests = await getQueue(room, UserModel);
       else response.stageStatus = room.stageParticipants.some((id) => id.toString() === userId)
@@ -71,10 +83,30 @@ export function registerRoomEvents(io, socket, { RoomModel = Room, UserModel = U
         : room.joinRequests.some((request) => request.userId.toString() === userId)
           ? "pending"
           : "idle";
+
+      socket.join(socketRoom);
+      if (!alreadyJoined) {
+        presenceEvent(socket, roomId, "room:participant_joined", userId);
+      }
       return acknowledge(callback, response);
     } catch {
       return acknowledge(callback, { error: "Could not join room signaling." });
     }
+  });
+
+  socket.on("room:leave", async (payload, callback) => {
+    const parsed = joinRoomSchema.safeParse(payload);
+    if (!parsed.success) return acknowledge(callback, { error: "Invalid room request." });
+
+    const { roomId } = parsed.data;
+    const socketRoom = roomSocketRoom(roomId);
+    if (!socket.rooms?.has(socketRoom)) {
+      return acknowledge(callback, { error: "You have not joined this room's signaling." });
+    }
+
+    await socket.leave(socketRoom);
+    presenceEvent(socket, roomId, "room:participant_left", userId);
+    return acknowledge(callback, { roomId });
   });
 
   socket.on("room:request_stage", async (payload, callback) => {

@@ -18,6 +18,7 @@
 * TASK-011 Agora RTC token service and authorized room access completed and verified.
 * TASK-012 live room creation, Agora video canvas, and microphone/camera controls completed and verified.
 * TASK-013 stage requests, mentor approval, and Agora publisher promotion completed and verified.
+* TASK-014 authentication, Agora token, and multi-client socket integration coverage completed and verified.
 * Development phase is underway.
 
 ---
@@ -66,6 +67,7 @@
 * Agora RTC Server Token Generation (TASK-011)
 * Live Room Creation & Audio/Video Canvas UI (TASK-012)
 * Interactive "Request to Join" Stage Queue Pipeline (TASK-013)
+* Integration Testing & Socket Flow Validation (TASK-014)
 
 
 * Development Rules & Cursor Rulebook (`RULES.md`, `.cursor/rules/real-time.mdc`)
@@ -82,19 +84,19 @@
 
 ## Current Task
 
-**TASK-014: Integration Testing & Socket Flow Validation**
+**TASK-015: Production Deployment & Verification**
 
-* Complete integration coverage for socket join/leave and disconnect flows.
-* Validate stage request state changes and remaining task requirements.
+* Resolve production dependency advisories and configure production deployments.
+* Verify production WebSocket signaling, Agora streaming, and MongoDB operations.
 
 ---
 
 ## Known Issues
 
-* None.
+* Production dependency audit reports advisories in `body-parser`, `ip-address`, and `zod`; review and resolve during TASK-015 hardening.
 
 ---
 
 ## Next Step
 
-Execute **TASK-014**, then complete production deployment and verification in **TASK-015**.
+Execute production hardening, deployment, and verification in **TASK-015**.

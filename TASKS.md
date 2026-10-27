@@ -175,7 +175,7 @@ Proceed to Next Sequential Task
 
 ## Phase 6: End-to-End Testing & Deployment
 
-* [ ] **TASK-014: Integration Testing & Socket Flow Validation**
+* [x] **TASK-014: Integration Testing & Socket Flow Validation**
 * Write unit tests for authentication middleware and Agora token generation services.
 * Perform integration testing for multi-user socket join/leave events and stage request state changes.
 

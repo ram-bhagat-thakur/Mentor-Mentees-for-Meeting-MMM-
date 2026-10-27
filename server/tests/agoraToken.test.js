@@ -1,165 +1,135 @@
-import assert from "node:assert/strict";
-import { randomBytes, randomUUID } from "node:crypto";
-import { once } from "node:events";
-import test from "node:test";
+import { afterAll, beforeEach, expect, jest, test } from "@jest/globals";
+import { randomBytes } from "node:crypto";
 import mongoose from "mongoose";
-import "../src/config/env.js";
-import app from "../src/app.js";
-import Room from "../src/models/Room.js";
-import User from "../src/models/User.js";
-import { signAccessToken } from "../src/utils/jwt.js";
+import request from "supertest";
 
-process.env.JWT_SECRET = randomBytes(32).toString("hex");
+const originalEnvironment = {
+  agoraAppId: process.env.AGORA_APP_ID,
+  agoraAppCertificate: process.env.AGORA_APP_CERTIFICATE,
+  jwtSecret: process.env.JWT_SECRET,
+};
+const testEnvironment = {
+  agoraAppId: "0123456789abcdef0123456789abcdef",
+  agoraAppCertificate: "abcdef0123456789abcdef0123456789",
+  jwtSecret: randomBytes(32).toString("hex"),
+};
+const mockFindRoomById = jest.fn();
+const mockFindUserById = jest.fn();
 
-test(
-  "Agora token route authorizes room roles, rejects outsiders, and returns a bounded token",
-  { skip: !process.env.MONGODB_URI },
-  async () => {
-    const suffix = randomUUID();
-    const emails = [
-      `mmm-agora-host-${suffix}@example.edu`,
-      `mmm-agora-subscriber-${suffix}@example.edu`,
-      `mmm-agora-speaker-${suffix}@example.edu`,
-      `mmm-agora-outsider-${suffix}@example.edu`,
-    ];
-    const previousSecret = process.env.JWT_SECRET;
-    const previousAppId = process.env.AGORA_APP_ID;
-    const previousCertificate = process.env.AGORA_APP_CERTIFICATE;
-    process.env.JWT_SECRET = randomBytes(32).toString("hex");
-    process.env.AGORA_APP_ID = "0123456789abcdef0123456789abcdef";
-    process.env.AGORA_APP_CERTIFICATE = "abcdef0123456789abcdef0123456789";
+await jest.unstable_mockModule("../src/models/Room.js", () => ({
+  default: { findById: mockFindRoomById },
+}));
+await jest.unstable_mockModule("../src/models/User.js", () => ({
+  default: { findById: mockFindUserById },
+}));
 
-    let roomId;
-    let server;
+const { default: app } = await import("../src/app.js");
+const { createAgoraRtcToken, RTC_TOKEN_TTL_SECONDS } = await import("../src/services/agoraService.js");
+const { signAccessToken } = await import("../src/utils/jwt.js");
 
-    try {
-      await mongoose.connect(process.env.MONGODB_URI);
-      const [host, subscriber, speaker, outsider] = await User.create([
-        {
-          name: "Agora Token Host",
-          email: emails[0],
-          password: "Agora-Token-Test-Password-123",
-          role: "mentor",
-          college: "Example University",
-        },
-        {
-          name: "Agora Subscriber",
-          email: emails[1],
-          password: "Agora-Token-Test-Password-123",
-          role: "mentee",
-          college: "Example University",
-        },
-        {
-          name: "Agora Stage Speaker",
-          email: emails[2],
-          password: "Agora-Token-Test-Password-123",
-          role: "mentee",
-          college: "Example University",
-        },
-        {
-          name: "Agora Outsider",
-          email: emails[3],
-          password: "Agora-Token-Test-Password-123",
-          role: "mentee",
-          college: "Example University",
-        },
-      ]);
-
-      const room = await Room.create({
-        hostId: host._id,
-        title: `Agora Token Room ${suffix}`,
-        status: "ongoing",
-        activeParticipants: [host._id, subscriber._id, speaker._id],
-        stageParticipants: [speaker._id],
-      });
-      roomId = room._id;
-
-      server = app.listen(0, "127.0.0.1");
-      await once(server, "listening");
-      const endpoint = `http://127.0.0.1:${server.address().port}/api/rooms/${roomId}/agora-token`;
-      const now = Math.floor(Date.now() / 1000);
-
-      async function requestToken(user) {
-        return fetch(endpoint, {
-          headers: { authorization: `Bearer ${signAccessToken(user)}` },
-        });
-      }
-
-      const hostResponse = await requestToken(host);
-      const hostBody = await hostResponse.json();
-      assert.equal(hostResponse.status, 200);
-      assert.equal(hostBody.role, "PUBLISHER");
-      assert.equal(hostBody.channelName, roomId.toString());
-      assert.equal(hostBody.uid, host._id.toString());
-      assert.equal(typeof hostBody.rtcToken, "string");
-      assert.ok(hostBody.privilegeExpireTime >= now + 3599);
-      assert.ok(hostBody.privilegeExpireTime <= now + 3601);
-      assert.equal(JSON.stringify(hostBody).includes(process.env.AGORA_APP_CERTIFICATE), false);
-      assert.equal(hostResponse.headers.get("cache-control"), "no-store");
-
-      const subscriberResponse = await requestToken(subscriber);
-      const subscriberBody = await subscriberResponse.json();
-      assert.equal(subscriberResponse.status, 200);
-      assert.equal(subscriberBody.role, "SUBSCRIBER");
-
-      const speakerResponse = await requestToken(speaker);
-      const speakerBody = await speakerResponse.json();
-      assert.equal(speakerResponse.status, 200);
-      assert.equal(speakerBody.role, "PUBLISHER");
-
-      const outsiderResponse = await requestToken(outsider);
-      assert.equal(outsiderResponse.status, 403);
-      assert.deepEqual(await outsiderResponse.json(), {
-        error: "User is not an authorized participant in this room",
-      });
-
-      const unauthenticatedResponse = await fetch(endpoint);
-      assert.equal(unauthenticatedResponse.status, 401);
-
-      const missingRoomResponse = await fetch(
-        `http://127.0.0.1:${server.address().port}/api/rooms/${new mongoose.Types.ObjectId()}/agora-token`,
-        { headers: { authorization: `Bearer ${signAccessToken(host)}` } },
-      );
-      assert.equal(missingRoomResponse.status, 404);
-      assert.deepEqual(await missingRoomResponse.json(), { error: "Room not found." });
-    } finally {
-      try {
-        if (mongoose.connection.readyState === 1) {
-          if (roomId) await Room.deleteOne({ _id: roomId });
-          await User.deleteMany({ email: { $in: emails } });
-        }
-      } finally {
-        try {
-          if (server) await new Promise((resolve) => server.close(resolve));
-          await mongoose.disconnect();
-        } finally {
-          process.env.JWT_SECRET = previousSecret;
-          if (previousAppId === undefined) delete process.env.AGORA_APP_ID;
-          else process.env.AGORA_APP_ID = previousAppId;
-          if (previousCertificate === undefined) delete process.env.AGORA_APP_CERTIFICATE;
-          else process.env.AGORA_APP_CERTIFICATE = previousCertificate;
-        }
-      }
-    }
-  },
+const host = { _id: new mongoose.Types.ObjectId(), role: "mentor" };
+const subscriber = { _id: new mongoose.Types.ObjectId(), role: "mentee" };
+const stageParticipant = { _id: new mongoose.Types.ObjectId(), role: "mentee" };
+const outsider = { _id: new mongoose.Types.ObjectId(), role: "mentee" };
+const usersById = new Map(
+  [host, subscriber, stageParticipant, outsider].map((user) => [
+    user._id.toString(),
+    user,
+  ]),
 );
+const roomId = new mongoose.Types.ObjectId();
+const room = {
+  _id: roomId,
+  hostId: host._id,
+  status: "ongoing",
+  activeParticipants: [host._id, subscriber._id, stageParticipant._id],
+  stageParticipants: [stageParticipant._id],
+};
 
-test("Agora token generation fails clearly when credentials are missing", async () => {
-  const { createAgoraRtcToken } = await import("../src/services/agoraService.js");
-  const previousAppId = process.env.AGORA_APP_ID;
-  const previousCertificate = process.env.AGORA_APP_CERTIFICATE;
+function requestAgoraToken(user) {
+  return request(app)
+    .get(`/api/rooms/${roomId}/agora-token`)
+    .set("Authorization", `Bearer ${signAccessToken(user)}`);
+}
+
+beforeEach(() => {
+  process.env.AGORA_APP_ID = testEnvironment.agoraAppId;
+  process.env.AGORA_APP_CERTIFICATE = testEnvironment.agoraAppCertificate;
+  process.env.JWT_SECRET = testEnvironment.jwtSecret;
+  mockFindRoomById.mockReset().mockImplementation(async (id) =>
+    id === roomId.toString() ? room : null);
+  mockFindUserById.mockReset().mockImplementation(async (id) =>
+    usersById.get(id.toString()) || null);
+});
+
+afterAll(() => {
+  for (const [key, value] of [
+    ["AGORA_APP_ID", originalEnvironment.agoraAppId],
+    ["AGORA_APP_CERTIFICATE", originalEnvironment.agoraAppCertificate],
+    ["JWT_SECRET", originalEnvironment.jwtSecret],
+  ]) {
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
+  }
+});
+
+test("generates Agora tokens with host, stage participant, and audience roles", () => {
+  const now = 1_700_000_000_000;
+  const hostToken = createAgoraRtcToken({ room, user: host, now });
+  const stageToken = createAgoraRtcToken({ room, user: stageParticipant, now });
+  const audienceToken = createAgoraRtcToken({ room, user: subscriber, now });
+
+  expect(hostToken.role).toBe("PUBLISHER");
+  expect(stageToken.role).toBe("PUBLISHER");
+  expect(audienceToken.role).toBe("SUBSCRIBER");
+  expect(hostToken.channelName).toBe(roomId.toString());
+  expect(hostToken.uid).toBe(host._id.toString());
+  expect(hostToken.privilegeExpireTime).toBe(
+    Math.floor(now / 1000) + RTC_TOKEN_TTL_SECONDS,
+  );
+  expect(hostToken.rtcToken).toEqual(expect.any(String));
+});
+
+test("returns publisher and subscriber tokens only to authorized room users", async () => {
+  const [hostResponse, subscriberResponse, stageResponse] = await Promise.all([
+    requestAgoraToken(host),
+    requestAgoraToken(subscriber),
+    requestAgoraToken(stageParticipant),
+  ]);
+
+  expect(hostResponse.status).toBe(200);
+  expect(hostResponse.body.role).toBe("PUBLISHER");
+  expect(hostResponse.headers["cache-control"]).toContain("no-store");
+  expect(hostResponse.text).not.toContain(testEnvironment.agoraAppCertificate);
+
+  expect(subscriberResponse.status).toBe(200);
+  expect(subscriberResponse.body.role).toBe("SUBSCRIBER");
+  expect(stageResponse.status).toBe(200);
+  expect(stageResponse.body.role).toBe("PUBLISHER");
+});
+
+test("rejects unauthenticated and non-participant Agora token requests", async () => {
+  const [unauthenticatedResponse, outsiderResponse] = await Promise.all([
+    request(app).get(`/api/rooms/${roomId}/agora-token`),
+    requestAgoraToken(outsider),
+  ]);
+
+  expect(unauthenticatedResponse.status).toBe(401);
+  expect(outsiderResponse.status).toBe(403);
+  expect(outsiderResponse.body).toEqual({
+    error: "User is not an authorized participant in this room",
+  });
+});
+
+test("returns not found for missing rooms and reports missing Agora credentials", async () => {
+  mockFindRoomById.mockResolvedValue(null);
+  const missingRoomResponse = await requestAgoraToken(host);
+  expect(missingRoomResponse.status).toBe(404);
+  expect(missingRoomResponse.body).toEqual({ error: "Room not found." });
+
   delete process.env.AGORA_APP_ID;
   delete process.env.AGORA_APP_CERTIFICATE;
-
-  try {
-    assert.throws(
-      () => createAgoraRtcToken({ room: {}, user: {} }),
-      /Agora RTC token service is not configured\. Missing: AGORA_APP_ID, AGORA_APP_CERTIFICATE\./,
-    );
-  } finally {
-    if (previousAppId === undefined) delete process.env.AGORA_APP_ID;
-    else process.env.AGORA_APP_ID = previousAppId;
-    if (previousCertificate === undefined) delete process.env.AGORA_APP_CERTIFICATE;
-    else process.env.AGORA_APP_CERTIFICATE = previousCertificate;
-  }
+  expect(() => createAgoraRtcToken({ room, user: host })).toThrow(
+    "Agora RTC token service is not configured. Missing: AGORA_APP_ID, AGORA_APP_CERTIFICATE.",
+  );
 });

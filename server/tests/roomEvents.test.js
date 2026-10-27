@@ -29,15 +29,26 @@ function makeRoom({ roomId = id(), hostId = id(), menteeId = id(), requests = []
   };
 }
 
-function makeSocket(userId) {
+function makeSocket(userId, events = []) {
   const handlers = new Map();
   const joinedRooms = [];
+  const rooms = new Set(["socket-id"]);
   return {
     user: { sub: userId },
     handlers,
     joinedRooms,
+    rooms,
     join(roomName) {
       joinedRooms.push(roomName);
+      rooms.add(roomName);
+    },
+    leave(roomName) {
+      rooms.delete(roomName);
+    },
+    to(roomName) {
+      return {
+        emit: (event, payload) => events.push({ roomName, event, payload }),
+      };
     },
     on(event, handler) {
       handlers.set(event, handler);
@@ -157,4 +168,66 @@ test("host rejection removes the queue entry and notifies the mentee", async () 
   assert.equal(room.joinRequests.length, 0);
   assert.equal(io.events.at(-1).roomName, `user:${menteeId}`);
   assert.equal(io.events.at(-1).event, "room:stage_rejected");
+});
+
+test("room join validates membership and broadcasts presence once", async () => {
+  const hostId = id();
+  const menteeId = id();
+  const room = makeRoom({ hostId, menteeId });
+  const events = [];
+  const models = makeModels(room, new Map());
+  const outsiderSocket = makeSocket(id(), events);
+  const io = makeIo();
+  registerRoomEvents(io, outsiderSocket, models);
+
+  const denied = await send(outsiderSocket, "room:join", { roomId: room._id });
+  assert.match(denied.error, /not a participant/);
+  assert.deepEqual(events, []);
+
+  const hostSocket = makeSocket(hostId, events);
+  registerRoomEvents(io, hostSocket, models);
+  assert.deepEqual(await send(hostSocket, "room:join", { roomId: room._id }), {
+    roomId: room._id,
+    requests: [],
+  });
+  await send(hostSocket, "room:join", { roomId: room._id });
+
+  assert.deepEqual(events, [{
+    roomName: `room:${room._id}`,
+    event: "room:participant_joined",
+    payload: { roomId: room._id, userId: hostId },
+  }]);
+});
+
+test("room leave and disconnect broadcast presence to room peers", async () => {
+  const hostId = id();
+  const menteeId = id();
+  const room = makeRoom({ hostId, menteeId });
+  const events = [];
+  const socket = makeSocket(menteeId, events);
+  registerRoomEvents(makeIo(), socket, makeModels(room, new Map()));
+
+  await send(socket, "room:join", { roomId: room._id });
+  events.length = 0;
+  assert.deepEqual(await send(socket, "room:leave", { roomId: room._id }), {
+    roomId: room._id,
+  });
+  assert.deepEqual(events, [{
+    roomName: `room:${room._id}`,
+    event: "room:participant_left",
+    payload: { roomId: room._id, userId: menteeId },
+  }]);
+  assert.equal(socket.rooms.has(`room:${room._id}`), false);
+
+  const leaveAgain = await send(socket, "room:leave", { roomId: room._id });
+  assert.match(leaveAgain.error, /not joined/);
+
+  await send(socket, "room:join", { roomId: room._id });
+  events.length = 0;
+  socket.handlers.get("disconnecting")();
+  assert.deepEqual(events, [{
+    roomName: `room:${room._id}`,
+    event: "room:participant_left",
+    payload: { roomId: room._id, userId: menteeId },
+  }]);
 });

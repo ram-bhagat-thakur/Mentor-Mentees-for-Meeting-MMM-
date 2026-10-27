@@ -5,24 +5,26 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
-    "check": "node --check src/config/env.js && node --check src/config/db.js && node --check src/middleware/errorHandler.js && node --check src/middleware/authMiddleware.js && node --check src/app.js && node --check src/index.js && node --check src/socket/index.js && node --check src/socket/events/feedEvents.js && node --check src/socket/events/roomEvents.js && node --check src/socket/middleware/authSocketMiddleware.js && node --check src/models/User.js && node --check src/models/Room.js && node --check src/models/index.js && node --check src/controllers/authController.js && node --check src/controllers/roomController.js && node --check src/routes/authRoutes.js && node --check src/routes/mentorRoutes.js && node --check src/routes/roomRoutes.js && node --check src/services/mentorService.js && node --check src/services/roomService.js && node --check src/services/agoraService.js && node --check src/controllers/mentorController.js && node --check src/utils/emailValidator.js && node --check src/utils/jwt.js && node --check tests/models.test.js && node --check tests/authRoutes.test.js && node --check tests/mentorRoutes.test.js && node --check tests/roomFeed.test.js && node --check tests/socketAuth.test.js && node --check tests/feedEvents.test.js && node --check tests/agoraToken.test.js && node --check tests/roomEvents.test.js && node --check tests/roomSocketIntegration.test.js",
+    "check": "node --check src/config/env.js && node --check src/config/db.js && node --check src/middleware/errorHandler.js && node --check src/middleware/authMiddleware.js && node --check src/app.js && node --check src/index.js && node --check src/socket/index.js && node --check src/socket/events/feedEvents.js && node --check src/socket/events/roomEvents.js && node --check src/socket/middleware/authSocketMiddleware.js && node --check src/models/User.js && node --check src/models/Room.js && node --check src/models/index.js && node --check src/controllers/authController.js && node --check src/controllers/roomController.js && node --check src/routes/authRoutes.js && node --check src/routes/mentorRoutes.js && node --check src/routes/roomRoutes.js && node --check src/services/mentorService.js && node --check src/services/roomService.js && node --check src/services/agoraService.js && node --check src/controllers/mentorController.js && node --check src/utils/emailValidator.js && node --check src/utils/jwt.js && node --check tests/models.test.js && node --check tests/authRoutes.test.js && node --check tests/mentorRoutes.test.js && node --check tests/roomFeed.test.js && node --check tests/socketAuth.test.js && node --check tests/feedEvents.test.js && node --check tests/agoraToken.test.js && node --check tests/authMiddleware.test.js && node --check tests/roomEvents.test.js && node --check tests/roomSocketIntegration.test.js",
     "lint": "eslint src tests",
-    "test": "node --test --test-concurrency=1"
+    "test": "node --test --test-concurrency=1 tests/authRoutes.test.js tests/feedEvents.test.js tests/mentorRoutes.test.js tests/models.test.js tests/roomEvents.test.js tests/roomFeed.test.js tests/roomSocketIntegration.test.js tests/socketAuth.test.js && node --experimental-vm-modules ../node_modules/jest/bin/jest.js --runInBand --runTestsByPath tests/authMiddleware.test.js tests/agoraToken.test.js"
   },
   "dependencies": {
+    "agora-token": "^2.0.6",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
-    "express-rate-limit": "^8.1.0",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.0",
-    "agora-token": "^2.0.6",
     "socket.io": "^4.8.1",
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "socket.io-client": "^4.8.1"
+    "jest": "^30.5.2",
+    "socket.io-client": "^4.8.1",
+    "supertest": "^7.3.1"
   }
 }
