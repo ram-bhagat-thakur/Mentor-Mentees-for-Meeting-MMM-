@@ -4,16 +4,20 @@ import SkeletonCard from "../components/common/SkeletonCard.jsx";
 import LiveRoomCard from "../components/dashboard/LiveRoomCard.jsx";
 import MentorSearch from "../components/dashboard/MentorSearch.jsx";
 import WorkspaceLayout from "../components/dashboard/WorkspaceLayout.jsx";
+import CreateRoomModal from "../components/dashboard/CreateRoomModal.jsx";
 import useSocket from "../hooks/useSocket.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import roomService from "../services/roomService.js";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [rooms, setRooms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshCount, setRefreshCount] = useState(0);
+  const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
 
   function handleFeedStatusChange(payload) {
     if (!payload?.room?._id) return;
@@ -73,6 +77,15 @@ export default function Dashboard() {
               {user?.college || "College not set"}
             </p>
           </div>
+          {user?.role === "mentor" && (
+            <button
+              className="inline-flex min-h-11 items-center justify-center rounded-button bg-primary-500 px-5 text-sm font-semibold text-white transition-colors hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+              onClick={() => setIsCreateRoomOpen(true)}
+              type="button"
+            >
+              Start a live room
+            </button>
+          )}
         </div>
 
         <section aria-labelledby="live-rooms-title" className="mt-9">
@@ -132,6 +145,15 @@ export default function Dashboard() {
 
         <MentorSearch currentCollege={user?.college || ""} />
       </main>
+      <CreateRoomModal
+        isOpen={isCreateRoomOpen}
+        onClose={() => setIsCreateRoomOpen(false)}
+        onCreated={(room) => {
+          handleFeedStatusChange({ action: "created", room });
+          setIsCreateRoomOpen(false);
+          navigate(`/rooms/${room._id}`);
+        }}
+      />
     </WorkspaceLayout>
   );
 }

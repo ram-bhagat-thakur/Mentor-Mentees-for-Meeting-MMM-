@@ -158,7 +158,7 @@ Proceed to Next Sequential Task
 * Implement mute/unmute audio and video toggle controls.
 
 
-* [ ] **TASK-013: Interactive "Request to Join" Stage Queue Pipeline**
+* [x] **TASK-013: Interactive "Request to Join" Stage Queue Pipeline**
 * Implement `room:request_stage` socket event for mentees to request microphone/stage access.
 
 

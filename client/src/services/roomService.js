@@ -17,6 +17,9 @@ const roomService = {
   endRoom(roomId) {
     return apiRequest(`/rooms/${encodeURIComponent(roomId)}/end`, { method: "PATCH" });
   },
+  getAgoraToken(roomId) {
+    return apiRequest(`/rooms/${encodeURIComponent(roomId)}/agora-token`);
+  },
 };
 
 export default roomService;

@@ -116,6 +116,9 @@ export async function leaveRoom(request, response, next) {
     if (wasParticipant) {
       room.activeParticipants.pull(request.user._id);
       room.stageParticipants.pull(request.user._id);
+      room.joinRequests = room.joinRequests.filter(
+        (joinRequest) => !joinRequest.userId.equals(request.user._id),
+      );
       await room.save();
       await room.populate({ path: "hostId", select: "name college mentorProfile.company" });
       emitRoomEvent(request, "updated", room);
@@ -141,6 +144,7 @@ export async function endRoom(request, response, next) {
       room.status = "ended";
       room.activeParticipants = [];
       room.stageParticipants = [];
+      room.joinRequests = [];
       await room.save();
       await room.populate({ path: "hostId", select: "name college mentorProfile.company" });
       emitRoomEvent(request, "ended", room);

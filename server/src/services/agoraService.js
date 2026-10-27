@@ -12,7 +12,7 @@ export function createAgoraRtcToken({ room, user, now = Date.now() }) {
   const hasStagePermission = (room.stageParticipants || []).some((participantId) =>
     participantId.equals(user._id),
   );
-  const role = isHost || user.role === "mentor" || hasStagePermission ? "PUBLISHER" : "SUBSCRIBER";
+  const role = isHost || hasStagePermission ? "PUBLISHER" : "SUBSCRIBER";
   const agoraRole = role === "PUBLISHER" ? RtcRole.PUBLISHER : RtcRole.SUBSCRIBER;
   const channelName = room._id.toString();
   const uid = userId;
