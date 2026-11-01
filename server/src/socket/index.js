@@ -5,7 +5,7 @@ import { registerRoomEvents } from "./events/roomEvents.js";
 export function initializeSocketServer(httpServer, { clientUrl, roomModels } = {}) {
   const io = new Server(httpServer, {
     cors: {
-      origin: clientUrl,
+      origin: Array.isArray(clientUrl) ? clientUrl : [clientUrl],
       methods: ["GET", "POST"],
     },
   });

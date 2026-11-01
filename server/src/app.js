@@ -7,12 +7,12 @@ import authMiddleware from "./middleware/authMiddleware.js";
 import mentorRoutes from "./routes/mentorRoutes.js";
 import roomRoutes from "./routes/roomRoutes.js";
 import errorHandler from "./middleware/errorHandler.js";
-import { env } from "./config/env.js";
+import { getAllowedClientOrigins } from "./config/env.js";
 
 const app = express();
 
 app.use(helmet());
-app.use(cors({ origin: env.clientUrl }));
+app.use(cors({ origin: getAllowedClientOrigins() }));
 app.use(express.json({ limit: "1mb" }));
 
 app.get("/", (_request, response) => {

@@ -16,6 +16,19 @@ export const env = Object.freeze({
 	),
 });
 
+export function getAllowedClientOrigins(clientUrl = env.clientUrl) {
+	const origins = [clientUrl];
+	if (process.env.NODE_ENV !== "production") {
+		const clientOrigin = new URL(clientUrl);
+		const port = clientOrigin.port ? `:${clientOrigin.port}` : "";
+		origins.push(
+			`${clientOrigin.protocol}//localhost${port}`,
+			`${clientOrigin.protocol}//127.0.0.1${port}`,
+		);
+	}
+	return [...new Set(origins)];
+}
+
 export function getAgoraCredentials() {
 	const appId = process.env.AGORA_APP_ID?.trim();
 	const appCertificate = process.env.AGORA_APP_CERTIFICATE?.trim();

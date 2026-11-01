@@ -2,11 +2,11 @@ import { createServer } from "node:http";
 import "./config/env.js";
 import app from "./app.js";
 import { connectDatabase } from "./config/db.js";
-import { env, validateProductionEnvironment } from "./config/env.js";
+import { env, getAllowedClientOrigins, validateProductionEnvironment } from "./config/env.js";
 import { initializeSocketServer } from "./socket/index.js";
 
 const httpServer = createServer(app);
-const io = initializeSocketServer(httpServer, { clientUrl: env.clientUrl });
+const io = initializeSocketServer(httpServer, { clientUrl: getAllowedClientOrigins() });
 app.set("io", io);
 
 async function startServer() {
