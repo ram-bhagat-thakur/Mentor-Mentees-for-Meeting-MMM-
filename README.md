@@ -27,3 +27,9 @@ npm run build
 ```
 
 Tailwind configuration and design tokens are scheduled for TASK-002.
+
+## Production Deployment
+
+Deployment configuration and provider environment-variable instructions are
+available in [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md). Configure secrets in
+the Render dashboard and public `VITE_` settings in Vercel; do not commit them.

@@ -15,6 +15,10 @@ app.use(helmet());
 app.use(cors({ origin: env.clientUrl }));
 app.use(express.json({ limit: "1mb" }));
 
+app.get("/", (_request, response) => {
+  response.status(200).json({ service: "MMM API", health: "/api/health" });
+});
+
 app.get("/api/health", (_request, response) => {
   response.status(200).json({ status: "ok", database: getDatabaseStatus() });
 });

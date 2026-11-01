@@ -5,7 +5,7 @@ dotenv.config({ path: fileURLToPath(new URL("../../.env", import.meta.url)) });
 
 export const env = Object.freeze({
 	port: Number(process.env.PORT) || 5000,
-	clientUrl: process.env.CLIENT_URL || "http://127.0.0.1:5173",
+	clientUrl: (process.env.CLIENT_URL || "http://127.0.0.1:5173").trim().replace(/\/+$/, ""),
 	agoraAppId: process.env.AGORA_APP_ID?.trim() || "",
 	agoraAppCertificate: process.env.AGORA_APP_CERTIFICATE?.trim() || "",
 	agoraConfigured: Boolean(
@@ -31,4 +31,46 @@ export function getAgoraCredentials() {
 	}
 
 	return { appId, appCertificate };
+}
+
+export function validateProductionEnvironment() {
+	const missing = ["MONGODB_URI", "JWT_SECRET", "CLIENT_URL"].filter(
+		(key) => !process.env[key]?.trim(),
+	);
+	if (missing.length > 0) {
+		throw new Error(`Production server configuration is incomplete. Missing: ${missing.join(", ")}.`);
+	}
+
+	const jwtSecret = process.env.JWT_SECRET.trim();
+	if (
+		Buffer.byteLength(jwtSecret) < 32 ||
+		/your_jwt_super_secret|change_in_production/i.test(jwtSecret)
+	) {
+		throw new Error("JWT_SECRET must be a non-placeholder value of at least 32 bytes in production.");
+	}
+
+	const clientUrl = process.env.CLIENT_URL.trim();
+	let clientOrigin;
+	try {
+		clientOrigin = new URL(clientUrl);
+	} catch {
+		throw new Error("CLIENT_URL must be a valid HTTPS origin in production.");
+	}
+	if (
+		clientOrigin.protocol !== "https:" ||
+		clientOrigin.origin !== clientUrl.replace(/\/+$/, "") ||
+		clientOrigin.pathname !== "/"
+	) {
+		throw new Error("CLIENT_URL must be a single HTTPS origin without a path, query, or fragment.");
+	}
+
+	if (!/^(mongodb|mongodb\+srv):\/\//.test(process.env.MONGODB_URI.trim())) {
+		throw new Error("MONGODB_URI must use the MongoDB connection URI scheme.");
+	}
+
+	if (process.env.PORT && (!Number.isInteger(Number(process.env.PORT)) || Number(process.env.PORT) < 1)) {
+		throw new Error("PORT must be a positive integer when provided.");
+	}
+
+	getAgoraCredentials();
 }

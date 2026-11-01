@@ -86,17 +86,19 @@
 
 **TASK-015: Production Deployment & Verification**
 
-* Resolve production dependency advisories and configure production deployments.
-* Verify production WebSocket signaling, Agora streaming, and MongoDB operations.
+* Vercel and Render deployment definitions and environment hardening are prepared.
+* Production deployment URLs and provider credentials are not available in this environment; production smoke tests remain outstanding.
+* Review dependency advisories before public launch.
 
 ---
 
 ## Known Issues
 
-* Production dependency audit reports advisories in `body-parser`, `ip-address`, and `zod`; review and resolve during TASK-015 hardening.
+* Production dependency audit reports advisories in `body-parser`, `ip-address`, and `zod`; review and resolve before public launch.
+* Live deployment and end-to-end production verification require Vercel, Render, MongoDB Atlas, and Agora project access.
 
 ---
 
 ## Next Step
 
-Execute production hardening, deployment, and verification in **TASK-015**.
+Set production dashboard variables, deploy both services, run the documented smoke tests, and close **TASK-015**.
