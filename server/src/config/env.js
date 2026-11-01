@@ -17,14 +17,20 @@ export const env = Object.freeze({
 });
 
 export function getAllowedClientOrigins(clientUrl = env.clientUrl) {
-	const origins = [clientUrl];
+	const configuredOrigins = clientUrl
+		.split(",")
+		.map((origin) => origin.trim().replace(/\/+$/, ""))
+		.filter(Boolean);
+	const origins = [...configuredOrigins];
 	if (process.env.NODE_ENV !== "production") {
-		const clientOrigin = new URL(clientUrl);
-		const port = clientOrigin.port ? `:${clientOrigin.port}` : "";
-		origins.push(
-			`${clientOrigin.protocol}//localhost${port}`,
-			`${clientOrigin.protocol}//127.0.0.1${port}`,
-		);
+		for (const configuredOrigin of configuredOrigins) {
+			const clientOrigin = new URL(configuredOrigin);
+			const port = clientOrigin.port ? `:${clientOrigin.port}` : "";
+			origins.push(
+				`${clientOrigin.protocol}//localhost${port}`,
+				`${clientOrigin.protocol}//127.0.0.1${port}`,
+			);
+		}
 	}
 	return [...new Set(origins)];
 }
@@ -62,19 +68,26 @@ export function validateProductionEnvironment() {
 		throw new Error("JWT_SECRET must be a non-placeholder value of at least 32 bytes in production.");
 	}
 
-	const clientUrl = process.env.CLIENT_URL.trim();
-	let clientOrigin;
-	try {
-		clientOrigin = new URL(clientUrl);
-	} catch {
-		throw new Error("CLIENT_URL must be a valid HTTPS origin in production.");
+	const clientUrls = process.env.CLIENT_URL.split(",")
+		.map((origin) => origin.trim())
+		.filter(Boolean);
+	if (clientUrls.length === 0) {
+		throw new Error("CLIENT_URL must include at least one HTTPS origin in production.");
 	}
-	if (
-		clientOrigin.protocol !== "https:" ||
-		clientOrigin.origin !== clientUrl.replace(/\/+$/, "") ||
-		clientOrigin.pathname !== "/"
-	) {
-		throw new Error("CLIENT_URL must be a single HTTPS origin without a path, query, or fragment.");
+	for (const clientUrl of clientUrls) {
+		let clientOrigin;
+		try {
+			clientOrigin = new URL(clientUrl);
+		} catch {
+			throw new Error("CLIENT_URL entries must be valid HTTPS origins in production.");
+		}
+		if (
+			clientOrigin.protocol !== "https:" ||
+			clientOrigin.origin !== clientUrl.replace(/\/+$/, "") ||
+			clientOrigin.pathname !== "/"
+		) {
+			throw new Error("CLIENT_URL entries must be HTTPS origins without a path, query, or fragment.");
+		}
 	}
 
 	if (!/^(mongodb|mongodb\+srv):\/\//.test(process.env.MONGODB_URI.trim())) {

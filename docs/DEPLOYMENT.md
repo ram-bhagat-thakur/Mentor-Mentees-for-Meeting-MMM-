@@ -15,7 +15,7 @@ Set these variables in the Render dashboard:
 | Variable | Value |
 | --- | --- |
 | `NODE_ENV` | `production` (also defined in `render.yaml`) |
-| `CLIENT_URL` | `https://mentor-bridge-seven.vercel.app` (HTTPS origin only; the server removes a trailing slash) |
+| `CLIENT_URL` | Comma-separated explicit HTTPS origins, e.g. `https://mentor-bridge-seven.vercel.app,https://mentor-bridge-git-main-mmm-e94f.vercel.app` |
 | `MONGODB_URI` | MongoDB Atlas connection URI for the production database |
 | `JWT_SECRET` | A randomly generated secret with at least 32 bytes |
 | `AGORA_APP_ID` | App ID for the production Agora project |
@@ -43,9 +43,10 @@ Vercel:
 Vite embeds `VITE_` variables into the public browser bundle. Never add
 `MONGODB_URI`, `JWT_SECRET`, or `AGORA_APP_CERTIFICATE` to Vercel. Production
 Vercel builds reject missing or malformed client URLs and missing Agora App IDs.
-Preview deployments are not automatically allowed by the single-origin
-production CORS policy; configure an intentional preview origin separately
-before testing previews.
+Render CORS allows only the exact HTTPS origins listed in `CLIENT_URL`, which
+can include both the canonical production domain and a stable Vercel branch
+alias. Arbitrary per-deployment preview URLs are not automatically allowed;
+add only preview origins that are intentionally trusted.
 
 After both services are deployed, set Render's `CLIENT_URL` to the final Vercel
 production origin and redeploy or restart the Render service.

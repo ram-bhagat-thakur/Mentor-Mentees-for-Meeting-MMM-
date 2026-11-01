@@ -25,3 +25,14 @@ test("production CORS allows only the configured client origin", () => {
     "https://mentor-bridge-seven.vercel.app",
   ]);
 });
+
+test("production CORS supports an explicit allowlist of Vercel origins", () => {
+  process.env.NODE_ENV = "production";
+
+  assert.deepEqual(getAllowedClientOrigins(
+    "https://mentor-bridge-seven.vercel.app, https://mentor-bridge-git-main-mmm-e94f.vercel.app/",
+  ), [
+    "https://mentor-bridge-seven.vercel.app",
+    "https://mentor-bridge-git-main-mmm-e94f.vercel.app",
+  ]);
+});
